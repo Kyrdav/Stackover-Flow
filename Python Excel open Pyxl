@@ -1,0 +1,32 @@
+So I wanted to add a value to a specific sheet in this case we have 2 sheets, Student Profile and Student Grades
+
+from openpyxl import load_workbook
+
+file = load_workbook("Registry.xlsx")
+sheet = file.active
+sheet.create_sheet("Student Grades")
+#Student Profile
+sheet["A1"] = "ID No.:"
+sheet["B1"] = "Last Name:"
+sheet["C1"] = "First Name:"
+sheet["D1"] = "Middle Name:"
+sheet["E1"] = "Sex:"
+sheet["F1"] = "Date of Birth:"
+file.save("Registry.xlsx")
+but if we do it again with for Student Grades it just overrides the previous values of Student Profile since it stays in the sheet1
+
+file = load_workbook("Registry.xlsx")
+sheet = file.active
+sheet["A1"] = "ID No:"
+sheet["B1"] = "Math"
+sheet["C1"] = "Science:"
+sheet["D1"] = "English"
+file.save("Registry.xlsx")
+I tried to do:
+
+sheet = file["Student Grades"].active
+#or
+sheet["Student Grades", "A1"] = "ID No."
+but it returns as an error. But I noticed, if you accessed sheet 2, Student Grades, using Excel and saved before exiting. It places the value on sheet 2 instead 1. The problem is I need it to be fully automated so I can't access excel beforehand.
+
+Edit: This is small part of a project with CRUD functions where we're restricted from using databases like sql. So we have to resort to excel instead. Since it have CRUD functions, excel file needs to be constantly updating when you have a added value to it. So i have to get that specific sheet and edit the cell values within it
