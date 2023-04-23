@@ -1,0 +1,70 @@
+Option Explicit
+
+Sub SendPDFPagesAsEmails()
+    Dim strPath As String
+    Dim strFileName As String
+    Dim strOutputPath As String
+    Dim i As Long
+    Dim AcrobatApp As Acrobat.AcroApp
+    Dim PDDoc As Acrobat.AcroPDDoc
+    Dim numPages As Long
+    
+    ' Set the path and file name of the PDF file
+    strPath = "C:\Path\To\PDF\"
+    strFileName = "YourFileName.pdf"
+    strOutputPath = "C:\Path\To\Output\"
+
+    ' Create a new Adobe Acrobat application
+    Set AcrobatApp = CreateObject("AcroExch.App")
+    Set PDDoc = CreateObject("AcroExch.PDDoc")
+    
+    ' Open the PDF file
+    If PDDoc.Open(strPath & strFileName) Then
+        numPages = PDDoc.GetNumPages
+        
+        ' Loop through each page of the PDF
+        For i = 0 To numPages - 1
+            ' Create a new PDF document for the single page
+            Dim newPDDoc As Acrobat.AcroPDDoc
+            Set newPDDoc = CreateObject("AcroExch.PDDoc")
+            
+            ' Insert the page into the new PDF document
+            newPDDoc.InsertPages -1, PDDoc, i, 1, 0
+            
+            ' Save the single page PDF to the output folder
+            newPDDoc.Save PDSaveFull, strOutputPath & "Page" & i + 1 & ".pdf"
+            newPDDoc.Close
+            
+            ' Send the single page PDF as an email attachment
+            SendEmailWithAttachment "recipient@example.com", "Subject", "Body", strOutputPath & "Page" & i + 1 & ".pdf"
+        Next i
+        
+        ' Close the original PDF and Adobe Acrobat application
+        PDDoc.Close
+        AcrobatApp.Exit
+    Else
+        MsgBox "Error: Could not open the PDF file."
+    End If
+
+    Set PDDoc = Nothing
+    Set AcrobatApp = Nothing
+End Sub
+
+Sub SendEmailWithAttachment(Recipient As String, Subject As String, Body As String, AttachmentPath As String)
+    Dim OutApp As Outlook.Application
+    Dim OutMail As Outlook.MailItem
+
+    Set OutApp = CreateObject("Outlook.Application")
+    Set OutMail = OutApp.CreateItem(olMailItem)
+
+    With OutMail
+        .To = Recipient
+        .Subject = Subject
+        .Body = Body
+        .Attachments.Add AttachmentPath
+        .Send
+    End With
+
+    Set OutMail = Nothing
+    Set OutApp = Nothing
+End Sub
